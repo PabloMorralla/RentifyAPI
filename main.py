@@ -102,3 +102,52 @@ def login(
         }
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+
+
+# -----------------------
+# POST /register
+# -----------------------
+
+@app.post("/register/property")
+def create_property(
+    user: dict = Body(...)
+):
+    required = ["address", "owner_fk", "ciudad", "pais", "alquiler"]
+    for field in required:
+        if field not in user:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Check for existing email
+    cursor.execute("SELECT id FROM Users WHERE email = ?", (user["email"],))
+    if cursor.fetchone():
+        conn.close()
+        raise HTTPException(status_code=401, detail="Email already registered")
+
+    cursor.execute("""
+        INSERT INTO Users (first_name, last_name, email, phone_number, password)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        user["first_name"],
+        user["last_name"],
+        user["email"],
+        user["phone_number"],
+        user["password"]
+    ))
+
+    conn.commit()
+    user_id = cursor.lastrowid
+    conn.close()
+
+    return {
+        "id": user_id,
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+        "email": user["email"],
+        "phone_number": user["phone_number"]
+    }
+
