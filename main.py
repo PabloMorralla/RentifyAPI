@@ -1,11 +1,13 @@
 import sqlite3
-from fastapi import FastAPI, HTTPException, Body
+
+from fastapi import FastAPI, HTTPException, Body, status
+from pydantic import BaseModel
 
 
 
 
 
-DB_PATH = "./rentify.sqlite"
+DB_PATH = "rentify.db"
 
 app = FastAPI()
 
@@ -73,7 +75,7 @@ def create_user(
 def login(
     body: dict = Body(...)
 ):
-    required = ["email", "password"]
+    required = ["email", "password", "tipo"]
     for field in required:
         if field not in body:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
@@ -93,12 +95,179 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     if (body["password"] == row[5]):
-        return {
-            "id": row[0],
-            "first_name": row[1],
-            "last_name": row[2],
-            "email": row[3],
-            "phone_number": row[4]
-        }
+        if(body["tipo"]=="owner"):
+            return {
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "phone_number": row[4],
+                "ownedProperty": get_properties_by_owner(row[0]),
+            }
+        elif (body["tipo"] == "tenant"):
+            return {
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "phone_number": row[4],
+                "leasedProperty": get_properties_by_tenant(row[0]),
+            }
+        else:
+            return {
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "phone_number": row[4]
+            }
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
+
+
+
+
+
+
+class Property(BaseModel):
+    address: str
+    owner_fk: int
+    ciudad: str
+    pais: str
+    alquiler: int
+
+
+# -----------------------
+# POST /property/register
+# -----------------------
+
+@app.post("/property/register", status_code=201)
+def create_property(newProperty: Property):
+
+    if not newProperty.address:
+        raise HTTPException(status_code=400, detail="Address obligatorio")
+
+    if not newProperty.owner_fk:
+        raise HTTPException(status_code=400, detail="Owner obligatorio")
+
+    query = """
+        INSERT INTO Properties (address, owner_fk, ciudad, pais, alquiler)
+        VALUES (?, ?, ?, ?, ?)
+    """
+
+    execute_query(query, [
+        newProperty.address,
+        newProperty.owner_fk,
+        newProperty.ciudad,
+        newProperty.pais,
+        newProperty.alquiler
+    ])
+
+    return {"message": "Propiedad creada correctamente"}
+
+
+
+def execute_query(query: str, params=None):
+    if params is None:
+        params = []
+
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(query, params)
+        conn.commit()
+        return cur.fetchall()
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
+# -----------------------
+# POST /property/owner/{owner_id}
+# -----------------------
+
+@app.get("/property/owner/{owner_id}")
+def get_properties_by_owner(owner_id: int):
+
+    if not owner_id:
+        raise HTTPException(status_code=400, detail="Owner obligatorio")
+
+    query = """
+        SELECT id, address, owner_fk, ciudad, pais, alquiler
+        FROM Properties
+        WHERE owner_fk = ?
+    """
+
+    rows = execute_query(query, [owner_id])
+
+    properties = []
+    for row in rows:
+        properties.append({
+            "id": row[0],
+            "address": row[1],
+            "owner_fk": row[2],
+            "ciudad": row[3],
+            "pais": row[4],
+            "alquiler": row[5],
+        })
+
+    return properties
+
+
+# -----------------------
+# POST /property/tenant/{tenant_id}
+# -----------------------
+
+@app.get("/property/tenant/{tenant_id}")
+def get_properties_by_tenant(tenant_id: int):
+
+    if not tenant_id:
+        raise HTTPException(status_code=400, detail="Tenant obligatorio")
+
+    query = """
+        SELECT property_fk
+        FROM Tenants
+        WHERE tenant_fk = ?
+    """
+
+    rows = execute_query(query, [tenant_id])
+
+    properties = []
+    for row in rows:
+
+        query = """
+                SELECT *
+                FROM Properties
+                WHERE id = ?
+            """
+
+        props = execute_query(query, [row[0]])
+        prop = props[0]
+        properties.append({
+            "id": prop[0],
+            "address": prop[1],
+            "owner_fk": prop[2],
+            "ciudad": prop[3],
+            "pais": prop[4],
+            "alquiler": prop[5],
+        })
+
+    return properties
+
+
