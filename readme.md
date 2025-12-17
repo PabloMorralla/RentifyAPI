@@ -52,12 +52,13 @@ Email must be unique.
 ### Body
 
 All required, none checked, email unique.
+
 Type can be owner or tenant.
 
 ```
 {
     "email": "pablo@example.com",
-    "password": "1234"
+    "password": "1234",
     "type": "tenant"
 }
 ```
@@ -70,7 +71,14 @@ Type can be owner or tenant.
 
 ### Returns
 
-(Only on success)
+(Only on success)   
+
+Type owner return an array of json objects in field ownedProperty -> [{}].
+
+Type tenant return a json object in field leasedProperty -> {}.
+
+If the user don't have any property or is not a tenant, null will be returned.
+
 
 ```
 {
@@ -79,16 +87,14 @@ Type can be owner or tenant.
     "last_name": "Morralla",
     "email": "pablo@example.com",
     "phone_number": "611620552",
-    "leasedProperty": [
-        {
-            "id": 2,
-            "address": "Calle Sol 9",
-            "owner_fk": 1,
-            "ciudad": "Sevilla",
-            "pais": "España",
-            "alquiler": 450
-        }
-    ]
+    "leasedProperty": {
+        "id": 2,
+        "address": "Calle Sol 9",
+        "owner_fk": 1,
+        "ciudad": "Sevilla",
+        "pais": "España",
+        "alquiler": 450
+    }
 }
 ```
 
