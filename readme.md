@@ -52,11 +52,13 @@ Email must be unique.
 ### Body
 
 All required, none checked, email unique.
+Type can be owner or tenant.
 
 ```
 {
-    "email": "marcg@example.com",
-    "password": "password1234"
+    "email": "pablo@example.com",
+    "password": "1234"
+    "type": "tenant"
 }
 ```
 
@@ -70,13 +72,26 @@ All required, none checked, email unique.
 
 (Only on success)
 
+```
 {
-    "id": 20,
-    "first_name": "Marc",
-    "last_name": "Gonzalez",
-    "email": "marcg@example.com",
-    "phone_number": "+34 612 532 457",
+    "id": 2,
+    "first_name": "Pablo",
+    "last_name": "Morralla",
+    "email": "pablo@example.com",
+    "phone_number": "611620552",
+    "leasedProperty": [
+        {
+            "id": 2,
+            "address": "Calle Sol 9",
+            "owner_fk": 1,
+            "ciudad": "Sevilla",
+            "pais": "España",
+            "alquiler": 450
+        }
+    ]
 }
+```
+
 
 
 # Property
