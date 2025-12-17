@@ -1,4 +1,5 @@
 import sqlite3
+
 from fastapi import FastAPI, HTTPException, Body, status
 from pydantic import BaseModel
 
@@ -74,7 +75,7 @@ def create_user(
 def login(
     body: dict = Body(...)
 ):
-    required = ["email", "password"]
+    required = ["email", "password", "tipo"]
     for field in required:
         if field not in body:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
@@ -94,22 +95,22 @@ def login(
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     if (body["password"] == row[5]):
-        return {
-            "id": row[0],
-            "first_name": row[1],
-            "last_name": row[2],
-            "email": row[3],
-            "phone_number": row[4]
-        }
+        if(body["tipo"]=="owner"):
+            return {
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "phone_number": row[4],
+                "leasedProperty": get_properties_by_owner(row[0]),
+            }
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 
 
-# -----------------------
-# POST /property/register
-# -----------------------
+
 
 class Property(BaseModel):
     address: str
@@ -117,6 +118,12 @@ class Property(BaseModel):
     ciudad: str
     pais: str
     alquiler: int
+
+# -----------------------
+# POST /property/register
+# -----------------------
+
+
 
 @app.post("/property/register", status_code=201)
 def create_property(newProperty: Property):
@@ -175,4 +182,31 @@ def execute_query(query: str, params=None):
         if conn:
             conn.close()
 
+
+@app.get("/property/owner/{owner_id}")
+def get_properties_by_owner(owner_id: int):
+
+    if not owner_id:
+        raise HTTPException(status_code=400, detail="Owner obligatorio")
+
+    query = """
+        SELECT id, address, owner_fk, ciudad, pais, alquiler
+        FROM Properties
+        WHERE owner_fk = ?
+    """
+
+    rows = execute_query(query, [owner_id])
+
+    properties = []
+    for row in rows:
+        properties.append({
+            "id": row[0],
+            "address": row[1],
+            "owner_fk": row[2],
+            "ciudad": row[3],
+            "pais": row[4],
+            "alquiler": row[5],
+        })
+
+    return properties
 
