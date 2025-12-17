@@ -102,7 +102,24 @@ def login(
                 "last_name": row[2],
                 "email": row[3],
                 "phone_number": row[4],
-                "leasedProperty": get_properties_by_owner(row[0]),
+                "ownedProperty": get_properties_by_owner(row[0]),
+            }
+        elif (body["tipo"] == "tenant"):
+            return {
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "phone_number": row[4],
+                "leasedProperty": get_properties_by_tenant(row[0]),
+            }
+        else:
+            return {
+                "id": row[0],
+                "first_name": row[1],
+                "last_name": row[2],
+                "email": row[3],
+                "phone_number": row[4]
             }
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -119,11 +136,10 @@ class Property(BaseModel):
     pais: str
     alquiler: int
 
+
 # -----------------------
 # POST /property/register
 # -----------------------
-
-
 
 @app.post("/property/register", status_code=201)
 def create_property(newProperty: Property):
@@ -182,6 +198,9 @@ def execute_query(query: str, params=None):
         if conn:
             conn.close()
 
+# -----------------------
+# POST /property/owner/{owner_id}
+# -----------------------
 
 @app.get("/property/owner/{owner_id}")
 def get_properties_by_owner(owner_id: int):
@@ -209,4 +228,46 @@ def get_properties_by_owner(owner_id: int):
         })
 
     return properties
+
+
+# -----------------------
+# POST /property/tenant/{tenant_id}
+# -----------------------
+
+@app.get("/property/tenant/{tenant_id}")
+def get_properties_by_tenant(tenant_id: int):
+
+    if not tenant_id:
+        raise HTTPException(status_code=400, detail="Tenant obligatorio")
+
+    query = """
+        SELECT property_fk
+        FROM Tenants
+        WHERE tenant_fk = ?
+    """
+
+    rows = execute_query(query, [tenant_id])
+
+    properties = []
+    for row in rows:
+
+        query = """
+                SELECT *
+                FROM Properties
+                WHERE id = ?
+            """
+
+        props = execute_query(query, [row[0]])
+        prop = props[0]
+        properties.append({
+            "id": prop[0],
+            "address": prop[1],
+            "owner_fk": prop[2],
+            "ciudad": prop[3],
+            "pais": prop[4],
+            "alquiler": prop[5],
+        })
+
+    return properties
+
 
