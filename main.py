@@ -198,9 +198,7 @@ def execute_query(query: str, params=None):
         if conn:
             conn.close()
 
-# -----------------------
-# POST /property/owner/{owner_id}
-# -----------------------
+
 
 def get_properties_by_owner(owner_id: int):
 
@@ -214,6 +212,9 @@ def get_properties_by_owner(owner_id: int):
     """
 
     rows = execute_query(query, [owner_id])
+
+    if not rows:
+        return None
 
     properties = []
     for row in rows:
@@ -229,9 +230,7 @@ def get_properties_by_owner(owner_id: int):
     return properties
 
 
-# -----------------------
-# POST /property/tenant/{tenant_id}
-# -----------------------
+
 
 def get_properties_by_tenant(tenant_id: int):
 
@@ -244,7 +243,13 @@ def get_properties_by_tenant(tenant_id: int):
         WHERE user_fk = ?
     """
 
-    id_property = execute_query(query, [tenant_id])[0][0]
+
+    exeq = execute_query(query, [tenant_id])
+
+    if not exeq:
+        return None
+
+    id_property = exeq[0][0]
 
     query = """
                 SELECT id, address, owner_fk, ciudad, pais, alquiler
@@ -264,7 +269,7 @@ def get_properties_by_tenant(tenant_id: int):
             "pais": row[4],
             "alquiler": row[5],
         })
-    return properties
+    return properties[0]
 
 
 
