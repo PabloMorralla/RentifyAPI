@@ -108,6 +108,36 @@ Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con 
     "leasedProperty": null
 }
 ```
+
+(user con propiedades)
+```
+{
+    "id": 1,
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com",
+    "phone_number": "123456789",
+    "ownedProperty": [
+        {
+            "id": 2,
+            "address": "Calle Sol 9",
+            "owner_fk": 1,
+            "ciudad": "Sevilla",
+            "pais": "España",
+            "alquiler": 450
+        },
+        {
+            "id": 3,
+            "address": "Calle Mayor 123",
+            "owner_fk": 1,
+            "ciudad": "Madrid",
+            "pais": "España",
+            "alquiler": 750
+        }
+    ]
+}
+```
+
 # Property
 
 ## Create a Property
