@@ -181,6 +181,63 @@ curl -X POST http://localhost:8000/property/register \
   }' -v
 ```
 
+# Tenants
+
+## Get tenants by property
+
+Devuelve todos los usuarios (inquilinos) asociados a una propiedad.
+### Route
+`GET /tenants/property/{property_id}`
+
+### Params
+
+| Name        | Type | Description        |
+| ----------- | ---- | ------------------ |
+| property_id | int  | ID de la propiedad |
+
+
+### Error Codes
+
+- 400: Missing field (id property)
+
+### Example Request:
+
+```
+curl -X GET "http://localhost:8000/tenants/property/2"
+
+```
+
+
+### Example of Response 
+
+
+```
+[
+    {
+        "id": 2,
+        "first_name": "Pablo",
+        "last_name": "Morralla",
+        "email": "pablo@example.com",
+        "phone_number": "611620552"
+    },
+    {
+        "id": 3,
+        "first_name": "Guille",
+        "last_name": "Campos",
+        "email": "guille@gmail.com",
+        "phone_number": "123424434"
+    },
+    {
+        "id": 4,
+        "first_name": "Juan",
+        "last_name": "Pérez",
+        "email": "juan.perez@example.com",
+        "phone_number": "5551000001"
+    }
+]
+
+```
+
 
 
 

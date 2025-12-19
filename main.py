@@ -286,26 +286,25 @@ def get_users_by_property(property_id: int):
 
     rows = execute_query(query, [property_id])
 
-    if not rows:
-        return None
-
     users = []
+
+    if not rows:
+        return users
+
     for row in rows:
         query = """
-                SELECT id, first_name, last_name, email, pais, phone_number
+                SELECT id, first_name, last_name, email, phone_number
                 FROM Users
                 WHERE id = ?
             """
 
         user = execute_query(query, [row[0]])[0]
-
         users.append({
             "id": user[0],
             "first_name": user[1],
             "last_name": user[2],
             "email": user[3],
-            "pais": user[4],
-            "phone_number": user[5],
+            "phone_number": user[4],
         })
 
     return users
