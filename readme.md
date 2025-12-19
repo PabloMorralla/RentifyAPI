@@ -187,7 +187,7 @@ curl -X POST http://localhost:8000/property/register \
 
 Devuelve todos los usuarios (inquilinos) asociados a una propiedad.
 ### Route
-`GET /tenants/property/{property_id}`
+`GET /property/tenants/{property_id}`
 
 ### Params
 
@@ -238,6 +238,51 @@ curl -X GET "http://localhost:8000/tenants/property/2"
 
 ```
 
+# Services
 
+## Get services by property
+
+Devuelve los servicios incluidos y excluidos asociados a una propiedad.
+
+### Route
+`GET /property/services/{property_id}`
+
+### Params
+
+| Name        | Type | Description        |
+| ----------- | ---- | ------------------ |
+| property_id | int  | ID de la propiedad |
+
+### Error Codes
+
+- 400: Missing field (id property)
+
+### Example Request
+
+```
+curl -X GET "http://localhost:8000/property/services/1"
+```
+
+### Example of Response
+(si tiene servicios)
+```
+{
+    "included": "agua luz",
+    "excluded": "ascensor"
+}
+```
+(si no llegase a tener sercvicios)
+```
+{
+    "included": null,
+    "excluded": null
+}
+```
+
+
+### Notes
+
+- El endpoint devuelve un único objeto con los servicios asociados a la propiedad.
+- Los campos `included` y `excluded` indican los servicios incluidos y no incluidos en el alquiler.
 
 
