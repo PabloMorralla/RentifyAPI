@@ -77,9 +77,9 @@ Type owner return an array of json objects in field ownedProperty -> [{}].
 
 Type tenant return a json object in field leasedProperty -> {}.
 
-If the user don't have any property or is not a tenant, null will be returned.
+Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con el campo ownedProperty o leasedProperty en null.
 
-
+(user con alquiler)
 ```
 {
     "id": 2,
@@ -97,9 +97,17 @@ If the user don't have any property or is not a tenant, null will be returned.
     }
 }
 ```
-
-
-
+(user sin alquiler)
+```
+{
+    "id": 13,
+    "first_name": "Valentina",
+    "last_name": "Cruz",
+    "email": "valentina.cruz@example.com",
+    "phone_number": "5551000010",
+    "leasedProperty": null
+}
+```
 # Property
 
 ## Create a Property
@@ -111,7 +119,7 @@ Create a property with all the information.
 
 ### Body:
 
-All fields are required, they will gol to be checked his format because a basemodel is used.
+All fields are required, they will gol to be checked his format(String/Int/Double) because a basemodel is used.
 
 ```
 {

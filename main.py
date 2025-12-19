@@ -271,6 +271,8 @@ def get_properties_by_tenant(tenant_id: int):
         })
     return properties[0]
 
+#funcion que toma id propiedad y devuelve users en dicha propiedad
+#def get_properties_by_tenant()
 
 
 
