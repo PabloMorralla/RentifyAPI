@@ -28,6 +28,8 @@ def create_user(
 ):
     required = ["first_name", "last_name", "email", "phone_number", "password"]
     for field in required:
+        if not user[field].strip():
+            raise HTTPException(status_code=400, detail=f"Void field: {field}")
         if field not in user:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
 
