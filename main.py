@@ -199,7 +199,7 @@ def execute_query(query: str, params=None):
             conn.close()
 
 
-
+#funcion que toma id owner y devuelve propiedades del owner
 def get_properties_by_owner(owner_id: int):
 
     if not owner_id:
@@ -231,7 +231,7 @@ def get_properties_by_owner(owner_id: int):
 
 
 
-
+#funcion que toma id inquilino y devuelve propiedad donde eat
 def get_properties_by_tenant(tenant_id: int):
 
     if not tenant_id:
@@ -270,6 +270,73 @@ def get_properties_by_tenant(tenant_id: int):
             "alquiler": row[5],
         })
     return properties[0]
+
+#funcion que toma id propiedad y devuelve users en dicha propiedad
+@app.get("/property/tenants/{property_id}")
+def get_users_by_property(property_id: int):
+
+    if not property_id:
+        raise HTTPException(status_code=400, detail="Propiedad obligatorio")
+
+    query = """
+        SELECT user_fk
+        FROM Tenants
+        WHERE property_fk = ?
+    """
+
+    rows = execute_query(query, [property_id])
+
+    users = []
+
+    if not rows:
+        return users
+
+    for row in rows:
+        query = """
+                SELECT id, first_name, last_name, email, phone_number
+                FROM Users
+                WHERE id = ?
+            """
+
+        user = execute_query(query, [row[0]])[0]
+        users.append({
+            "id": user[0],
+            "first_name": user[1],
+            "last_name": user[2],
+            "email": user[3],
+            "phone_number": user[4],
+        })
+
+    return users
+
+
+#funcion que toma id propiedad y devuelve servicios de dicha propiedad
+@app.get("/property/services/{property_id}")
+def get_services_by_property(property_id: int):
+
+    if not property_id:
+        raise HTTPException(status_code=400, detail="Propiedad obligatorio")
+
+    query = """
+        SELECT included, excluded
+        FROM Services
+        WHERE property_fk = ?
+    """
+
+    rows = execute_query(query, [property_id])
+
+    if not rows:
+        return {
+            "included": None,
+            "excluded": None
+        }
+
+    service = rows[0]
+
+    return {
+        "included": service[0],
+        "excluded": service[1],
+    }
 
 
 
