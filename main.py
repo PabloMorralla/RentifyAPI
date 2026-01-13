@@ -341,5 +341,30 @@ def get_services_by_property(property_id: int):
     }
 
 
+# -----------------------
+# GET /user/ownerfk/
+# -----------------------
+
+#funcion que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
+@app.get("/user/ownerfk/{owner_fk}")
+def get_user_by_owner(owner_fk: int):
+
+    if not owner_fk:
+        raise HTTPException(status_code=400, detail="ID obligatorio")
+
+    query = """SELECT id, first_name, last_name, email, phone_number
+            FROM Users
+            WHERE id = ?"""
+
+    user = execute_query(query, [owner_fk])[0]
+
+    return {
+            "id": user[0],
+            "first_name": user[1],
+            "last_name": user[2],
+            "email": user[3],
+            "phone_number": user[4],
+        }
+
 
 
