@@ -345,7 +345,7 @@ def get_services_by_property(property_id: int):
 # GET /user/ownerfk/
 # -----------------------
 
-#funcion que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
+#endpoint que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
 @app.get("/user/ownerfk/{owner_fk}")
 def get_user_by_owner(owner_fk: int):
 
@@ -367,4 +367,48 @@ def get_user_by_owner(owner_fk: int):
         }
 
 
+# -------------
+# PUT /update/user
+# -------------
+
+@app.put("/update/user")
+def update_user(
+        body: dict = Body(...)
+):
+    required = ["id", "actualpassword","newpassword"]
+    for field in required:
+        if field not in body:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+
+    #crear funcion para validar la password si no es correcto sacar error especifico
+
+
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE Users
+        SET first_name = ?,
+            last_name = ?,
+            email = ?,
+            phone_number = ?,
+            password = ?
+        WHERE id = ?
+    """, (
+        body["first_name"],
+        body["last_name"],
+        body["email"],
+        body["phone_number"],
+        body["newpassword"],
+        body["id"]
+    ))
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if not row:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
 
