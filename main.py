@@ -375,40 +375,139 @@ def get_user_by_owner(owner_fk: int):
 def update_user(
         body: dict = Body(...)
 ):
-    required = ["id", "actualpassword","newpassword"]
+    required = ["id", "first_name", "last_name", "email", "phone_number", "actualpassword", "newpassword"]
     for field in required:
         if field not in body:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
 
 
-    #crear funcion para validar la password si no es correcto sacar error especifico
+    conn=None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    #crear logica donde si se pasa un field vacio por lo que sea se pone por defecto
+        cursor.execute("""SELECT id, first_name, last_name, email, phone_number, password
+                        FROM Users
+                        WHERE id = ?""", [body["id"]])
 
+        user = cursor.fetchone()
+
+        if not user:
+            raise HTTPException(status_code=400, detail=f"Missing user: id {body["id"]}")
+
+        if not body["actualpassword"] == user[5]:
+            raise HTTPException(status_code=401, detail="Invalid password")
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
+    first_name = body["first_name"]
+    last_name = body["last_name"]
+    email = body["email"]
+    phone_number = body["phone_number"]
+    password = body["actualpassword"]
+
+    #no puedo iterar sobre body
+    if body["first_name"] =="":
+        first_name = user[1]
+    if body["last_name"] =="":
+        last_name = user[2]
+    if body["email"] =="":
+        email = user[3]
+    if body["phone_number"] =="":
+        phone_number = user[4]
+
+    if body["newpassword"] !="":
+        password = body["newpassword"]
+
+    print(first_name, last_name, email, phone_number, password)
+
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Users
+            SET first_name = ?,
+                last_name = ?,
+                email = ?,
+                phone_number = ?,
+                password = ?
+            WHERE id = ?
+        """, (
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            password,
+            body["id"]
+        ))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return {"message""No se actualizó ningún registro"}
+        else:
+            return {"message": "Usuario actualizado correctamente"}
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
+
+
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE Users
-        SET first_name = ?,
-            last_name = ?,
-            email = ?,
-            phone_number = ?,
-            password = ?
-        WHERE id = ?
-    """, (
-        body["first_name"],
-        body["last_name"],
-        body["email"],
-        body["phone_number"],
-        body["newpassword"],
-        body["id"]
-    ))
+    cursor.execute(
+        "DELETE FROM Users WHERE id = ?",
+        (user_id,)
+    )
 
-    row = cursor.fetchone()
+    conn.commit()
 
-    conn.close()
+    if cursor.rowcount == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
 
-    if not row:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
+    return {
+        "message": "Usuario eliminado correctamente",
+        "user_id": user_id
+    }
