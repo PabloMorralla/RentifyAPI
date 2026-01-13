@@ -383,7 +383,7 @@ def update_user(
 
     #crear funcion para validar la password si no es correcto sacar error especifico
 
-
+    #crear logica donde si se pasa un field vacio por lo que sea se pone por defecto
 
     conn = get_connection()
     cursor = conn.cursor()
