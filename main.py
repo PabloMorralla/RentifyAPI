@@ -342,7 +342,7 @@ def get_services_by_property(property_id: int):
 
 
 # -----------------------
-# GET /user/ownerfk/
+# GET /owner/{owner_fk}
 # -----------------------
 
 #endpoint que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
@@ -352,18 +352,19 @@ def get_user_by_owner(owner_fk: int):
     if not owner_fk:
         raise HTTPException(status_code=400, detail="ID obligatorio")
 
-    query = """SELECT id, first_name, last_name, email, phone_number
+    query = """SELECT id, first_name, last_name, phone_number, email
             FROM Users
             WHERE id = ?"""
 
     user = execute_query(query, [owner_fk])[0]
-
+    print(user)
     return {
             "id": user[0],
             "first_name": user[1],
             "last_name": user[2],
-            "email": user[3],
-            "phone_number": user[4],
+            "phone_number": user[3],
+            "email": user[4],
+
         }
 
 
