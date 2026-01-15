@@ -346,7 +346,7 @@ def get_services_by_property(property_id: int):
 # -----------------------
 
 #endpoint que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
-@app.get("/user/ownerfk/{owner_fk}")
+@app.get("/owner/{owner_fk}")
 def get_user_by_owner(owner_fk: int):
 
     if not owner_fk:
