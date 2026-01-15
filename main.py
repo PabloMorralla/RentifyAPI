@@ -345,7 +345,7 @@ def get_services_by_property(property_id: int):
 # GET /user/ownerfk/
 # -----------------------
 
-#funcion que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
+#endpoint que toma id ownerfk de una propiedad y devuelve el user owner de dicha propiedad
 @app.get("/user/ownerfk/{owner_fk}")
 def get_user_by_owner(owner_fk: int):
 
@@ -367,4 +367,147 @@ def get_user_by_owner(owner_fk: int):
         }
 
 
+# -------------
+# PUT /update/user
+# -------------
 
+@app.put("/update/user")
+def update_user(
+        body: dict = Body(...)
+):
+    required = ["id", "first_name", "last_name", "email", "phone_number", "actualpassword", "newpassword"]
+    for field in required:
+        if field not in body:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+
+    conn=None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""SELECT id, first_name, last_name, email, phone_number, password
+                        FROM Users
+                        WHERE id = ?""", [body["id"]])
+
+        user = cursor.fetchone()
+
+        if not user:
+            raise HTTPException(status_code=400, detail=f"Missing user: id {body["id"]}")
+
+        if not body["actualpassword"] == user[5]:
+            raise HTTPException(status_code=401, detail="Invalid password")
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
+    first_name = body["first_name"]
+    last_name = body["last_name"]
+    email = body["email"]
+    phone_number = body["phone_number"]
+    password = body["actualpassword"]
+
+    #no puedo iterar sobre body
+    if body["first_name"] =="":
+        first_name = user[1]
+    if body["last_name"] =="":
+        last_name = user[2]
+    if body["email"] =="":
+        email = user[3]
+    if body["phone_number"] =="":
+        phone_number = user[4]
+
+    if body["newpassword"] !="":
+        password = body["newpassword"]
+
+    print(first_name, last_name, email, phone_number, password)
+
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Users
+            SET first_name = ?,
+                last_name = ?,
+                email = ?,
+                phone_number = ?,
+                password = ?
+            WHERE id = ?
+        """, (
+            first_name,
+            last_name,
+            email,
+            phone_number,
+            password,
+            body["id"]
+        ))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return {"message""No se actualizó ningún registro"}
+        else:
+            return {"message": "Usuario actualizado correctamente"}
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
+
+
+
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM Users WHERE id = ?",
+        (user_id,)
+    )
+
+    conn.commit()
+
+    if cursor.rowcount == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no encontrado"
+        )
+
+    return {
+        "message": "Usuario eliminado correctamente",
+        "user_id": user_id
+    }
