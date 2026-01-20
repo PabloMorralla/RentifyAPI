@@ -368,6 +368,30 @@ def get_user_by_owner(owner_fk: int):
         }
 
 
+
+
+def get_user_by_id(user_id: int):
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="ID obligatorio")
+
+    query = """SELECT id, first_name, last_name, phone_number, email
+            FROM Users
+            WHERE id = ?"""
+
+    user = execute_query(query, [user_id])[0]
+    print(user)
+    return {
+            "id": user[0],
+            "first_name": user[1],
+            "last_name": user[2],
+            "phone_number": user[3],
+            "email": user[4],
+
+        }
+
+
+
 # -------------
 # PUT /update/user
 # -------------
@@ -464,9 +488,10 @@ def update_user(
         conn.commit()
 
         if cursor.rowcount == 0:
-            return {"message""No se actualizó ningún registro"}
+            return {"message": "No se actualizó ningún usuario"}
         else:
-            return {"message": "Usuario actualizado correctamente"}
+            return get_user_by_id(body["id"])
+
 
     except sqlite3.IntegrityError as e:
         if conn:
@@ -486,7 +511,6 @@ def update_user(
     finally:
         if conn:
             conn.close()
-
 
 
 
@@ -512,3 +536,58 @@ def delete_user(user_id: int):
         "message": "Usuario eliminado correctamente",
         "user_id": user_id
     }
+
+
+
+
+# -------------
+# POST /incidents/create
+# -------------
+
+@app.post("/incidents/create")
+def create_incident(
+        body: dict = Body(...)
+):
+    required = ["asunto", "descrip", "id_owner", "id_tenant", "id_property"]
+    for field in required:
+        if field not in body:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+
+    conn=None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+                INSERT INTO Incidents (asunto, descrip, id_owner, id_tenant, id_property)
+                VALUES (?, ?, ?, ?, ?)
+            """, [body["asunto"],body["descrip"],body["id_owner"],body["id_tenant"],body["id_property"]])
+
+        conn.commit()
+        incident_id = cursor.lastrowid
+
+        return {
+            "message": "Incident created successfully",
+            "id": incident_id
+        }
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
