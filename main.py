@@ -380,7 +380,6 @@ def get_user_by_id(user_id: int):
             WHERE id = ?"""
 
     user = execute_query(query, [user_id])[0]
-    print(user)
     return {
             "id": user[0],
             "first_name": user[1],
@@ -406,6 +405,8 @@ def update_user(
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
 
 
+    print(body["first_name"], body["last_name"], body["email"] , body["phone_number"] , body["actualpassword"] )
+
     conn=None
     try:
         conn = get_connection()
@@ -419,10 +420,10 @@ def update_user(
 
         if not user:
             raise HTTPException(status_code=400, detail=f"Missing user: id {body["id"]}")
-
         if not body["actualpassword"] == user[5]:
             raise HTTPException(status_code=401, detail="Invalid password")
-
+    except HTTPException:
+        raise
     except sqlite3.IntegrityError as e:
         if conn:
             conn.rollback()
@@ -461,7 +462,6 @@ def update_user(
     if body["newpassword"] !="":
         password = body["newpassword"]
 
-    print(first_name, last_name, email, phone_number, password)
 
     conn = None
     try:
@@ -591,3 +591,32 @@ def create_incident(
         if conn:
             conn.close()
 
+
+
+#funcion que toma id propiedad y devuelve incidentes en dicha propiedad
+@app.get("/property/incidents/{property_id}")
+def get_users_by_property(property_id: int):
+
+    if not property_id:
+        raise HTTPException(status_code=400, detail="Propiedad obligatorio")
+
+    query = """
+        SELECT id, asunto, descrip, id_owner, id_tenant, id_property
+        FROM Incidents
+        WHERE id_property = ?
+    """
+
+    rows = execute_query(query, [property_id])
+    incidents = [
+        {
+            "id": row[0],
+            "issue": row[1],
+            "description": row[2],
+            "property_id": row[3],
+            "tenant": get_user_by_id(row[4]),
+            "owner_id": row[5]
+        }
+        for row in rows
+    ]
+
+    return incidents
