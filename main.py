@@ -595,7 +595,7 @@ def create_incident(
 
 #funcion que toma id propiedad y devuelve incidentes en dicha propiedad
 @app.get("/property/incidents/{property_id}")
-def get_users_by_property(property_id: int):
+def get_incidents_by_property(property_id: int):
 
     if not property_id:
         raise HTTPException(status_code=400, detail="Propiedad obligatorio")
