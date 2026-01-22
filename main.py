@@ -612,11 +612,99 @@ def get_incidents_by_property(property_id: int):
             "id": row[0],
             "issue": row[1],
             "description": row[2],
-            "property_id": row[3],
+            "owner_id": row[3],
             "tenant": get_user_by_id(row[4]),
-            "owner_id": row[5]
+            "property_id": row[5]
         }
         for row in rows
     ]
 
     return incidents
+
+
+
+@app.delete("/incidents/{incident_id}")
+def delete_incident(incident_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM Incidents WHERE id = ?",
+        (incident_id,)
+    )
+
+    conn.commit()
+
+    if cursor.rowcount == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="Incidente no encontrado"
+        )
+
+    return {
+        "message": "Incidente eliminado correctamente",
+        "user_id": incident_id
+    }
+
+# -------------
+# PUT /update/incident
+# -------------
+
+@app.put("/update/incident")
+def update_incident(
+        body: dict = Body(...)
+):
+    required = ["id", "asunto", "descrip"]
+    for field in required:
+        if field not in body:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+
+
+
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE Incidents
+            SET asunto = ?,
+                descrip = ?
+            WHERE id = ?
+        """, (
+            body["asunto"],
+            body["descrip"],
+            body["id"]
+        ))
+
+        conn.commit()
+
+        if cursor.rowcount == 0:
+            return {"message": "No se actualizó ningún incident"}
+        else:
+            return {
+                "message": "Incidente actualizado correctamente",
+                "user_id": body["id"]
+            }
+
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
