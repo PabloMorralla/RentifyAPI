@@ -720,6 +720,11 @@ def get_tenant_by_email(email: str):
             WHERE email = ?"""
 
     user = execute_query(query, [email])[0]
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="Tenant no encontrado"
+        )
     return {
             "id": user[0],
             "first_name": user[1],
