@@ -708,3 +708,71 @@ def update_incident(
         if conn:
             conn.close()
 
+
+
+def get_tenant_by_email(email: str):
+
+    if not email:
+        raise HTTPException(status_code=400, detail="email obligatorio")
+
+    query = """SELECT id, first_name, last_name, phone_number, email
+            FROM Users
+            WHERE email = ?"""
+
+    user = execute_query(query, [email])[0]
+    return {
+            "id": user[0],
+            "first_name": user[1],
+            "last_name": user[2],
+            "phone_number": user[3],
+            "email": user[4],
+
+        }
+
+# -----------------------
+# POST /property/tenant/register
+# -----------------------
+
+@app.post("/property/tenant/register", status_code=201)
+def add_tenant_into_property(
+        body: dict = Body(...)
+):
+    required = ["property_fk", "email"]
+    for field in required:
+        if field not in body:
+            raise HTTPException(status_code=400, detail=f"Missing field: {field}")
+
+
+    tenant = get_tenant_by_email(body["email"])
+
+
+    if not tenant:
+        raise HTTPException(
+            status_code=404,
+            detail="Tenant no encontrado"
+        )
+
+    query = """SELECT id, property_fk, user_fk
+                FROM Tenants
+                WHERE user_fk = ?"""
+
+    tenants = execute_query(query, [tenant["id"]])
+
+    print(tenants)
+
+    if tenants:
+        raise HTTPException(
+            status_code=404,
+            detail="Tenant ya existe"
+        )
+
+
+    query = """
+        INSERT INTO Tenants (property_fk, user_fk)
+        VALUES (?, ?)
+    """
+
+    execute_query(query, (
+        body["property_fk"],
+        tenant["id"]
+    ))
