@@ -286,3 +286,185 @@ curl -X GET "http://localhost:8000/property/services/1"
 - Los campos `included` y `excluded` indican los servicios incluidos y no incluidos en el alquiler.
 
 
+# User
+
+## Update a User
+
+Update a User with all the information.
+
+### Route
+`PUT /update/user`
+
+### Body:
+
+All fields are required.
+Password must be correct in field actualpassword.
+
+```
+{
+    "id": 100,
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "phone_number": "",
+    "actualpassword": "test",
+    "newpassword": ""
+}
+```
+
+### Error Codes
+
+- 400: Missing field
+- 401: Invalid password
+
+### Example of response 
+
+```
+{
+    "id": 100,
+    "first_name": "ownertest",
+    "last_name": "test",
+    "phone_number": "1111111111",
+    "email": "ownertest@example.com"
+}
+```
+
+## Delete a User
+
+Delete an existent User.
+
+### Route
+`DELETE /users/{user_id}`
+
+### Body:
+
+User id is required.
+
+### Error Codes
+
+- 404: User not found
+
+### Example of response 
+
+```
+{
+    "message": "Usuario eliminado correctamente",
+    "user_id": 12
+}
+```
+
+
+
+# Incidents
+
+## Create an Incident
+
+Create an incident with all the information.
+
+### Route
+`POST /incidents/create`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "asunto": "asuntotest",
+    "descrip": "descripciontest",
+    "id_owner": 1,
+    "id_tenant": 1,
+    "id_property": 1
+}
+```
+
+### Error Codes
+
+- 400: Missing field.
+
+
+## Obtain Incidents
+
+Obtain incidents by property id.
+### Route
+`GET /property/incidents/{property_id}`
+
+### Request:
+
+Property id is required
+
+```
+curl -X GET "http://localhost:8000/property/incidents/7"
+```
+
+### Error Codes
+
+- 400: Missing Property.
+
+### Response:
+
+```
+[
+    {
+        "id": 1,
+        "issue": "asuntotest",
+        "description": "descripciontest",
+        "owner_id": 100,
+        "tenant": {
+            "id": 101,
+            "first_name": "tenanttest",
+            "last_name": "test",
+            "phone_number": "22222222222",
+            "email": "tenanttest@example.com"
+        },
+        "property_id": 7
+    },
+    {
+        "id": 7,
+        "issue": "asunto prueba",
+        "description": "descripcion test",
+        "owner_id": 100,
+        "tenant": {
+            "id": 101,
+            "first_name": "tenanttest",
+            "last_name": "test",
+            "phone_number": "22222222222",
+            "email": "tenanttest@example.com"
+        },
+        "property_id": 7
+    }
+]
+```
+# Tenants
+
+## Register a tenat in a Property
+
+Register an existent tenat in a Property
+
+### Route
+`POST /property/tenant/register`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "property_fk": 7,
+    "email": "paquitaflores@example.com"
+}
+```
+
+### Error Codes
+
+- 400: Missing field.
+- 404: Tenant in an existent property or missing
+
+### Response:
+
+```
+{
+    "detail": "Tenant ya existe"
+}
+```
+
