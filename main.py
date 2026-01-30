@@ -26,7 +26,7 @@ def get_connection():
 def create_user(
     user: dict = Body(...)
 ):
-    required = ["first_name", "last_name", "email", "phone_number", "password"]
+    required = ["first_name", "last_name", "email", "phone_number", "password", "type"]
     for field in required:
         if not user[field].strip():
             raise HTTPException(status_code=400, detail=f"Void field: {field}")
@@ -43,14 +43,15 @@ def create_user(
         raise HTTPException(status_code=401, detail="Email already registered")
 
     cursor.execute("""
-        INSERT INTO Users (first_name, last_name, email, phone_number, password)
+        INSERT INTO Users (first_name, last_name, email, phone_number, password, type)
         VALUES (?, ?, ?, ?, ?)
     """, (
         user["first_name"],
         user["last_name"],
         user["email"],
         user["phone_number"],
-        user["password"]
+        user["password"],
+        user["type"]
     ))
 
     conn.commit()
@@ -62,7 +63,8 @@ def create_user(
         "first_name": user["first_name"],
         "last_name": user["last_name"],
         "email": user["email"],
-        "phone_number": user["phone_number"]
+        "phone_number": user["phone_number"],
+        "type": user["type"]
     }
 
 
@@ -86,42 +88,45 @@ def login(
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, first_name, last_name, email, phone_number, password
+        SELECT id, first_name, last_name, email, phone_number, password ,type
         FROM Users WHERE email = ?
     """, (body["email"],))
 
-    row = cursor.fetchone()
+    user = cursor.fetchone()
     conn.close()
 
-    if not row:
+    if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if (body["password"] == row[5]):
+    if (body["password"] == user[5]):
         if(body["type"]=="owner"):
             return {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "phone_number": row[4],
-                "ownedProperty": get_properties_by_owner(row[0]),
+                "id": user[0],
+                "first_name": user[1],
+                "last_name": user[2],
+                "email": user[3],
+                "phone_number": user[4],
+                "ownedProperty": get_properties_by_owner(user[0]),
+                "type": user[6]
             }
         elif (body["type"] == "tenant"):
             return {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "phone_number": row[4],
-                "leasedProperty": get_properties_by_tenant(row[0]),
+                "id": user[0],
+                "first_name": user[1],
+                "last_name": user[2],
+                "email": user[3],
+                "phone_number": user[4],
+                "leasedProperty": get_properties_by_tenant(user[0]),
+                "type": user[6]
             }
         else:
             return {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "phone_number": row[4]
+                "id": user[0],
+                "first_name": user[1],
+                "last_name": user[2],
+                "email": user[3],
+                "phone_number": user[4],
+                "type": user[6]
             }
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
