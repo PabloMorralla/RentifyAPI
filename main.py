@@ -519,17 +519,40 @@ def update_user(
             conn.close()
 
 
+def get_user_type_by_id(user_id: int):
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="ID obligatorio")
+
+    query = """SELECT type
+            FROM Users
+            WHERE id = ?"""
+
+    user = execute_query(query, [user_id])[0]
+    if user:
+        return {
+            user[0]
+        }
+    return None
+
 
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int):
+
+    user_type = get_user_type_by_id(user_id)
+
+    if user_type == "owner":
+        print()
+
+
+
+
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute(
         "DELETE FROM Users WHERE id = ?",
         (user_id,)
     )
-
     conn.commit()
 
     if cursor.rowcount == 0:
