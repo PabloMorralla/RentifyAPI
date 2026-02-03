@@ -528,24 +528,36 @@ def get_user_type_by_id(user_id: int):
             FROM Users
             WHERE id = ?"""
 
-    user = execute_query(query, [user_id])[0]
+    user = execute_query(query, [user_id])
     if user:
-        return {
-            user[0]
-        }
+        return user[0]
+
     return None
 
 
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int):
 
-    user_type = get_user_type_by_id(user_id)
-
+    user_type = get_user_type_by_id(user_id)[0]
     if user_type == "owner":
-        print()
 
+        ##Eliminar relaciones tenants por propedad tambien
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM Properties WHERE owner_fk = ?",
+            (user_id,)
+        )
+        conn.commit()
 
-
+    elif user_type == "tenant":
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM Tenants WHERE user_fk = ?",
+            (user_id,)
+        )
+        conn.commit()
 
     conn = get_connection()
     cursor = conn.cursor()
