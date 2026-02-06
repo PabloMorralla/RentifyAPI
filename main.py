@@ -772,7 +772,7 @@ def get_tenant_by_email(email: str):
             detail="Tenant no encontrado"
         )
     print(user)
-    if not user[5]== "tenant":
+    if not user[0][5]== "tenant":
         raise HTTPException(status_code=400, detail="User tenant required")
 
     return {
