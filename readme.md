@@ -483,7 +483,7 @@ All fields are required.
 
 Changelog:
 
-- In create user (`POST /user`), you need to add field type in the body of the request and on successfully create response with a Json body of user with the field type now.
+- In create user (`POST /register`), you need to add field type in the body of the request and on successfully create response with a Json body of user with the field type now.
 ```
 {
     "first_name": "Marc",
