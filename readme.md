@@ -18,7 +18,8 @@ Email must be unique.
     "last_name": "Gonzalez",
     "email": "marcg@example.com",
     "phone_number": "+34 612 532 457",
-    "password": "password1234"
+    "password": "password1234",
+    "type": "owner"
 }
 ```
 
@@ -38,6 +39,8 @@ Email must be unique.
     "last_name": "Gonzalez",
     "email": "marcg@example.com",
     "phone_number": "+34 612 532 457",
+    "type": "owner"
+
 }
 ```
 
@@ -94,7 +97,9 @@ Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con 
         "ciudad": "Sevilla",
         "pais": "España",
         "alquiler": 450
-    }
+    },
+    "type": "tenant"
+    
 }
 ```
 (user sin alquiler)
@@ -105,7 +110,9 @@ Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con 
     "last_name": "Cruz",
     "email": "valentina.cruz@example.com",
     "phone_number": "5551000010",
-    "leasedProperty": null
+    "leasedProperty": null,
+    "type": "tenant"
+
 }
 ```
 
@@ -134,7 +141,8 @@ Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con 
             "pais": "España",
             "alquiler": 750
         }
-    ]
+    ],
+    "type": "owner"
 }
 ```
 
@@ -467,4 +475,75 @@ All fields are required.
     "detail": "Tenant ya existe"
 }
 ```
+
+
+# Changes 
+
+## User now has field "type"
+
+Changelog:
+
+- In create user (`POST /user`), you need to add field type in the body of the request and on successfully create response with a Json body of user with the field type now.
+```
+{
+    "first_name": "Marc",
+    "last_name": "Gonzalez",
+    "email": "marcg@example.com",
+    "phone_number": "+34 612 532 457",
+    "type": "owner"
+}
+```
+- In login (`POST /login`), now field type is necessary for login.
+
+(tenant)
+```
+{
+    "id": 2,
+    "first_name": "Pablo",
+    "last_name": "Morralla",
+    "email": "pablo@example.com",
+    "phone_number": "611620552",
+    "leasedProperty": {
+        "id": 2,
+        "address": "Calle Sol 9",
+        "owner_fk": 1,
+        "ciudad": "Sevilla",
+        "pais": "España",
+        "alquiler": 450
+    },
+    "type": "tenant"
+    
+}
+```
+(owner)
+```
+{
+    "id": 1,
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john@example.com",
+    "phone_number": "123456789",
+    "ownedProperty": [
+        {
+            "id": 2,
+            "address": "Calle Sol 9",
+            "owner_fk": 1,
+            "ciudad": "Sevilla",
+            "pais": "España",
+            "alquiler": 450
+        },
+        {
+            "id": 3,
+            "address": "Calle Mayor 123",
+            "owner_fk": 1,
+            "ciudad": "Madrid",
+            "pais": "España",
+            "alquiler": 750
+        }
+    ],
+    "type": "owner"
+}
+```
+
+
 

@@ -26,7 +26,7 @@ def get_connection():
 def create_user(
     user: dict = Body(...)
 ):
-    required = ["first_name", "last_name", "email", "phone_number", "password"]
+    required = ["first_name", "last_name", "email", "phone_number", "password", "type"]
     for field in required:
         if not user[field].strip():
             raise HTTPException(status_code=400, detail=f"Void field: {field}")
@@ -43,14 +43,15 @@ def create_user(
         raise HTTPException(status_code=401, detail="Email already registered")
 
     cursor.execute("""
-        INSERT INTO Users (first_name, last_name, email, phone_number, password)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO Users (first_name, last_name, email, phone_number, password, type)
+        VALUES (?, ?, ?, ?, ?, ?)
     """, (
         user["first_name"],
         user["last_name"],
         user["email"],
         user["phone_number"],
-        user["password"]
+        user["password"],
+        user["type"]
     ))
 
     conn.commit()
@@ -62,7 +63,8 @@ def create_user(
         "first_name": user["first_name"],
         "last_name": user["last_name"],
         "email": user["email"],
-        "phone_number": user["phone_number"]
+        "phone_number": user["phone_number"],
+        "type": user["type"]
     }
 
 
@@ -86,42 +88,45 @@ def login(
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT id, first_name, last_name, email, phone_number, password
+        SELECT id, first_name, last_name, email, phone_number, password ,type
         FROM Users WHERE email = ?
     """, (body["email"],))
 
-    row = cursor.fetchone()
+    user = cursor.fetchone()
     conn.close()
 
-    if not row:
+    if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    if (body["password"] == row[5]):
-        if(body["type"]=="owner"):
+    if (body["password"] == user[5]) and (body["type"] == user[6]):
+        if body["type"]== "owner":
             return {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "phone_number": row[4],
-                "ownedProperty": get_properties_by_owner(row[0]),
+                "id": user[0],
+                "first_name": user[1],
+                "last_name": user[2],
+                "email": user[3],
+                "phone_number": user[4],
+                "ownedProperty": get_properties_by_owner(user[0]),
+                "type": user[6]
             }
-        elif (body["type"] == "tenant"):
+        elif body["type"] == "tenant":
             return {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "phone_number": row[4],
-                "leasedProperty": get_properties_by_tenant(row[0]),
+                "id": user[0],
+                "first_name": user[1],
+                "last_name": user[2],
+                "email": user[3],
+                "phone_number": user[4],
+                "leasedProperty": get_properties_by_tenant(user[0]),
+                "type": user[6]
             }
         else:
             return {
-                "id": row[0],
-                "first_name": row[1],
-                "last_name": row[2],
-                "email": row[3],
-                "phone_number": row[4]
+                "id": user[0],
+                "first_name": user[1],
+                "last_name": user[2],
+                "email": user[3],
+                "phone_number": user[4],
+                "type": user[6]
             }
     else:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -352,20 +357,25 @@ def get_user_by_owner(owner_fk: int):
     if not owner_fk:
         raise HTTPException(status_code=400, detail="ID obligatorio")
 
-    query = """SELECT id, first_name, last_name, phone_number, email
+    query = """SELECT id, first_name, last_name, phone_number, email, type
             FROM Users
             WHERE id = ?"""
 
     user = execute_query(query, [owner_fk])[0]
     print(user)
+
+    if not user[5]== "owner":
+        raise HTTPException(status_code=400, detail="User owner required")
+
     return {
             "id": user[0],
             "first_name": user[1],
             "last_name": user[2],
             "phone_number": user[3],
             "email": user[4],
+            "type": user[5]
 
-        }
+    }
 
 
 
@@ -514,17 +524,52 @@ def update_user(
             conn.close()
 
 
+def get_user_type_by_id(user_id: int):
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="ID obligatorio")
+
+    query = """SELECT type
+            FROM Users
+            WHERE id = ?"""
+
+    user = execute_query(query, [user_id])
+    if user:
+        return user[0]
+
+    return None
+
 
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int):
+
+    user_type = get_user_type_by_id(user_id)[0]
+    if user_type == "owner":
+
+        ##Eliminar relaciones tenants por propedad tambien
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM Properties WHERE owner_fk = ?",
+            (user_id,)
+        )
+        conn.commit()
+
+    elif user_type == "tenant":
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "DELETE FROM Tenants WHERE user_fk = ?",
+            (user_id,)
+        )
+        conn.commit()
+
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute(
         "DELETE FROM Users WHERE id = ?",
         (user_id,)
     )
-
     conn.commit()
 
     if cursor.rowcount == 0:
@@ -716,7 +761,7 @@ def get_tenant_by_email(email: str):
     if not email:
         raise HTTPException(status_code=400, detail="email obligatorio")
 
-    query = """SELECT id, first_name, last_name, phone_number, email
+    query = """SELECT id, first_name, last_name, phone_number, email, type
             FROM Users
             WHERE email = ?"""
 
@@ -727,6 +772,9 @@ def get_tenant_by_email(email: str):
             detail="Tenant no encontrado"
         )
     print(user)
+    if not user[0][5]== "tenant":
+        raise HTTPException(status_code=400, detail="User tenant required")
+
     return {
             "id": user[0][0],
             "first_name": user[0][1],
