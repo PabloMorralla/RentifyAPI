@@ -253,6 +253,68 @@ curl -X POST http://localhost:8000/property/register \
   }' -v
 ```
 
+## Update a Property
+
+Update a Property with all the information.
+
+### Route
+`PUT /property/update`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "address": "Calle Sol 9",
+    "owner_fk": 1,
+    "ciudad": "Sevilla",
+    "pais": "España",
+    "alquiler": 450
+}
+```
+
+### Error Codes
+
+- 400: Missing field
+- 401: Invalid password
+
+### Example of response 
+
+```
+{
+    "id": 100,
+    "first_name": "ownertest",
+    "last_name": "test",
+    "phone_number": "1111111111",
+    "email": "ownertest@example.com"
+}
+```
+
+## Delete a User
+
+Delete an existent User.
+
+### Route
+`DELETE /users/{user_id}`
+
+### Body:
+
+User id is required.
+
+### Error Codes
+
+- 404: User not found
+
+### Example of response 
+
+```
+{
+    "message": "Usuario eliminado correctamente",
+    "user_id": 12
+}
+```
+
 # Tenants
 
 ## Get tenants by property
