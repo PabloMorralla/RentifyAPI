@@ -45,6 +45,70 @@ Email must be unique.
 ```
 
 
+## Update a User
+
+Update a User with all the information.
+
+### Route
+`PUT /update/user`
+
+### Body:
+
+All fields are required.
+Password must be correct in field actualpassword.
+
+```
+{
+    "id": 100,
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "phone_number": "",
+    "actualpassword": "test",
+    "newpassword": ""
+}
+```
+
+### Error Codes
+
+- 400: Missing field
+- 401: Invalid password
+
+### Example of response 
+
+```
+{
+    "id": 100,
+    "first_name": "ownertest",
+    "last_name": "test",
+    "phone_number": "1111111111",
+    "email": "ownertest@example.com"
+}
+```
+
+## Delete a User
+
+Delete an existent User.
+
+### Route
+`DELETE /users/{user_id}`
+
+### Body:
+
+User id is required.
+
+### Error Codes
+
+- 404: User not found
+
+### Example of response 
+
+```
+{
+    "message": "Usuario eliminado correctamente",
+    "user_id": 12
+}
+```
 
 ## Login
 
@@ -246,6 +310,37 @@ curl -X GET "http://localhost:8000/tenants/property/2"
 
 ```
 
+## Register a tenat in a Property
+
+Register an existent tenat in a Property
+
+### Route
+`POST /property/tenant/register`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "property_fk": 7,
+    "email": "paquitaflores@example.com"
+}
+```
+
+### Error Codes
+
+- 400: Missing field.
+- 404: Tenant in an existent property or missing
+
+### Response:
+
+```
+{
+    "detail": "Tenant ya existe"
+}
+```
+
 # Services
 
 ## Get services by property
@@ -292,74 +387,6 @@ curl -X GET "http://localhost:8000/property/services/1"
 
 - El endpoint devuelve un único objeto con los servicios asociados a la propiedad.
 - Los campos `included` y `excluded` indican los servicios incluidos y no incluidos en el alquiler.
-
-
-# User
-
-## Update a User
-
-Update a User with all the information.
-
-### Route
-`PUT /update/user`
-
-### Body:
-
-All fields are required.
-Password must be correct in field actualpassword.
-
-```
-{
-    "id": 100,
-    "first_name": "",
-    "last_name": "",
-    "email": "",
-    "phone_number": "",
-    "actualpassword": "test",
-    "newpassword": ""
-}
-```
-
-### Error Codes
-
-- 400: Missing field
-- 401: Invalid password
-
-### Example of response 
-
-```
-{
-    "id": 100,
-    "first_name": "ownertest",
-    "last_name": "test",
-    "phone_number": "1111111111",
-    "email": "ownertest@example.com"
-}
-```
-
-## Delete a User
-
-Delete an existent User.
-
-### Route
-`DELETE /users/{user_id}`
-
-### Body:
-
-User id is required.
-
-### Error Codes
-
-- 404: User not found
-
-### Example of response 
-
-```
-{
-    "message": "Usuario eliminado correctamente",
-    "user_id": 12
-}
-```
 
 
 
@@ -443,43 +470,14 @@ curl -X GET "http://localhost:8000/property/incidents/7"
     }
 ]
 ```
-# Tenants
 
-## Register a tenat in a Property
-
-Register an existent tenat in a Property
-
-### Route
-`POST /property/tenant/register`
-
-### Body:
-
-All fields are required.
-
-```
-{
-    "property_fk": 7,
-    "email": "paquitaflores@example.com"
-}
-```
-
-### Error Codes
-
-- 400: Missing field.
-- 404: Tenant in an existent property or missing
-
-### Response:
-
-```
-{
-    "detail": "Tenant ya existe"
-}
-```
 
 
 # Changes 
 
 ## User now has field "type"
+
+Important: the following endpoints are the only ones affected by the addition of the field type in User; all others continue to function as before. 
 
 Changelog:
 
