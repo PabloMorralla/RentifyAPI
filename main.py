@@ -209,7 +209,7 @@ def execute_query(query: str, params=None):
 def update_property(
         body: dict = Body(...)
 ):
-    required = ["id", "address", "owner_fk", "ciudad", "pais", "alquiler"]
+    required = ["id", "address", "ciudad", "pais", "alquiler"]
     for field in required:
         if field not in body:
             raise HTTPException(status_code=400, detail=f"Missing field: {field}")
@@ -257,14 +257,12 @@ def update_property(
         cursor.execute("""
             UPDATE Properties
             SET address = ?,
-                owner_fk = ?,
                 ciudad = ?,
                 pais = ?,
                 precio = ?
             WHERE id = ?
         """, (
             body["address"],
-            body["owner_fk"],
             body["ciudad"],
             body["pais"],
             body["precio"],
@@ -275,6 +273,8 @@ def update_property(
 
         if cursor.rowcount == 0:
             return {"message": "No se actualizó ningúna propiedad"}
+        else:
+            return {"message": "Propiedad actualizada correctamente"}
 
 
 
@@ -315,7 +315,10 @@ def delete_property(id: int):
             status_code=404,
             detail="Propiedad no encontrada"
         )
-
+    return {
+        "message": "Propiedad eliminada correctamente",
+        "user_id": id
+    }
 
 
 
@@ -786,14 +789,14 @@ def get_incidents_by_property(property_id: int):
 
 
 
-@app.delete("/incidents/{incident_id}")
-def delete_incident(incident_id: int):
+@app.delete("/incidents/{id}")
+def delete_incident(id: int):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute(
         "DELETE FROM Incidents WHERE id = ?",
-        (incident_id,)
+        (id,)
     )
 
     conn.commit()
@@ -806,7 +809,7 @@ def delete_incident(incident_id: int):
 
     return {
         "message": "Incidente eliminado correctamente",
-        "user_id": incident_id
+        "id": id
     }
 
 # -------------
@@ -848,7 +851,7 @@ def update_incident(
         else:
             return {
                 "message": "Incidente actualizado correctamente",
-                "user_id": body["id"]
+                "id": body["id"]
             }
 
 

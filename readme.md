@@ -266,8 +266,8 @@ All fields are required.
 
 ```
 {
+    "id": 2
     "address": "Calle Sol 9",
-    "owner_fk": 1,
     "ciudad": "Sevilla",
     "pais": "España",
     "alquiler": 450
@@ -277,41 +277,35 @@ All fields are required.
 ### Error Codes
 
 - 400: Missing field
-- 401: Invalid password
-
 ### Example of response 
 
 ```
 {
-    "id": 100,
-    "first_name": "ownertest",
-    "last_name": "test",
-    "phone_number": "1111111111",
-    "email": "ownertest@example.com"
+    "message": "Propiedad actualizada correctamente"
 }
 ```
 
-## Delete a User
+## Delete a Property
 
-Delete an existent User.
+Delete an existent Property.
 
 ### Route
-`DELETE /users/{user_id}`
+`DELETE /property/{id}`
 
 ### Body:
 
-User id is required.
+Property id is required.
 
 ### Error Codes
 
-- 404: User not found
+- 404: Property not found
 
 ### Example of response 
 
 ```
 {
-    "message": "Usuario eliminado correctamente",
-    "user_id": 12
+    "message": "Propiedad eliminada correctamente",
+    "id": 2
 }
 ```
 
@@ -531,6 +525,60 @@ curl -X GET "http://localhost:8000/property/incidents/7"
         "property_id": 7
     }
 ]
+```
+
+## Update an Incident
+
+Update an Incident with all the information.
+
+### Route
+`PUT /update/incident`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "id": 2
+    "asunto": "asunto test",
+    "descrip": "descripcion test"
+}
+```
+
+### Error Codes
+
+- 400: Missing field
+### Example of response 
+
+```
+{
+    "message": "Incidente actualizado correctamente"
+}
+```
+
+## Delete an Incident
+
+Delete an existent Incident.
+
+### Route
+`DELETE /incidents/{id}`
+
+### Body:
+
+Incident id is required.
+
+### Error Codes
+
+- 404: Incident not found
+
+### Example of response 
+
+```
+{
+    "message": "Incidente eliminado correctamente",
+    "id": id
+}
 ```
 
 
