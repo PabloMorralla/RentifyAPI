@@ -570,8 +570,8 @@ All fields are required.
 ```
 {
     "id": 2
-    "asunto": "asunto test",
-    "descrip": "descripcion test"
+    "issue": "asunto test",
+    "description": "descripcion test"
 }
 ```
 
