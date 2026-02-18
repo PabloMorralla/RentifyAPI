@@ -1,3 +1,32 @@
+# Table of Contents
+
+- [Users](#users)
+  - [Create a User](#create-a-user)
+  - [Update a User](#update-a-user)
+  - [Delete a User](#delete-a-user)
+  - [Login](#login)
+
+- [Property](#property)
+  - [Create a Property](#create-a-property)
+  - [Update a Property](#update-a-property)
+  - [Delete a Property](#delete-a-property)
+
+- [Tenants](#tenants)
+  - [Get tenants by property](#get-tenants-by-property)
+  - [Register a tenant in a Property](#register-a-tenat-in-a-property)
+
+- [Services](#services)
+  - [Get services by property](#get-services-by-property)
+
+- [Incidents](#incidents)
+  - [Create an Incident](#create-an-incident)
+  - [Obtain Incidents](#obtain-incidents)
+  - [Update an Incident](#update-an-incident)
+  - [Delete an Incident](#delete-an-incident)
+
+- [Changes](#changes)
+  - [User now has field "type"](#user-now-has-field-type)
+
 # Users
 
 ## Create a User
