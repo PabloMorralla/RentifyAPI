@@ -24,6 +24,9 @@
   - [Update an Incident](#update-an-incident)
   - [Delete an Incident](#delete-an-incident)
 
+- [Images](#Images)
+  - [Get images](#get-images)
+
 - [Changes](#changes)
   - [User now has field "type"](#user-now-has-field-type)
 
@@ -613,7 +616,7 @@ Incident id is required.
 
 # Images
 
-## GET images
+## get images
 
 Get images for the app.
 
