@@ -611,6 +611,36 @@ Incident id is required.
 ```
 
 
+# Images
+
+## GET images
+
+Get images for the app.
+
+### Route
+`GET /images`
+
+### Example of response 
+
+The response is an array of strings.
+
+```
+[
+    "https://gcronax.github.io/RentifyImages/test.jpg",
+    "https://gcronax.github.io/RentifyImages/piscina.jpg",
+    "https://gcronax.github.io/RentifyImages/recepcion.jpg",
+    "https://gcronax.github.io/RentifyImages/comedor.jpg",
+    "https://gcronax.github.io/RentifyImages/pasillos.jpg",
+    "https://gcronax.github.io/RentifyImages/room.jpg",
+    "https://gcronax.github.io/RentifyImages/room2.jpg",
+    "https://gcronax.github.io/RentifyImages/sexroom.jpg",
+    "https://gcronax.github.io/RentifyImages/cocina.jpg",
+    "https://gcronax.github.io/RentifyImages/bano.jpg",
+    "https://gcronax.github.io/RentifyImages/bano2.jpg",
+    "https://gcronax.github.io/RentifyImages/IMG-20260221-WA0001.jpg"
+]
+```
+
 
 # Changes 
 
