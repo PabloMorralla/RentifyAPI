@@ -7,11 +7,9 @@ from definitions import get_connection, get_user_by_id, execute_query
 
 router = APIRouter()
 
-# -------------
-# POST /incidents/create
-# -------------
 
-@router.post("/incidents/create")
+
+@router.get("/incidents/create")
 def create_incident(
         body: dict = Body(...)
 ):
