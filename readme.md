@@ -636,11 +636,10 @@ The response is an array of strings.
     "https://gcronax.github.io/RentifyImages/pasillos.jpg",
     "https://gcronax.github.io/RentifyImages/room.jpg",
     "https://gcronax.github.io/RentifyImages/room2.jpg",
-    "https://gcronax.github.io/RentifyImages/sexroom.jpg",
+    "https://gcronax.github.io/RentifyImages/voidroom.jpg",
     "https://gcronax.github.io/RentifyImages/cocina.jpg",
     "https://gcronax.github.io/RentifyImages/bano.jpg",
-    "https://gcronax.github.io/RentifyImages/bano2.jpg",
-    "https://gcronax.github.io/RentifyImages/IMG-20260221-WA0001.jpg"
+    "https://gcronax.github.io/RentifyImages/bano2.jpg"
 ]
 ```
 
