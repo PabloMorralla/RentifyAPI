@@ -7,6 +7,7 @@
   - [Login](#login)
 
 - [Property](#property)
+  - [Get Properties](#get-properties)
   - [Create a Property](#create-a-property)
   - [Update a Property](#update-a-property)
   - [Delete a Property](#delete-a-property)
@@ -17,6 +18,9 @@
 
 - [Services](#services)
   - [Get services by property](#get-services-by-property)
+  - [Create service](#create-services)
+  - [Update service](#update-services)
+
 
 - [Incidents](#incidents)
   - [Create an Incident](#create-an-incident)
@@ -244,6 +248,48 @@ Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con 
 
 # Property
 
+## Get Properties
+
+Get properties with all the information.
+
+### Route
+`GET /property/owner/{owner_id}`
+
+### Param:
+
+Only required owner id to return their properties.
+
+### Error Codes
+
+- 400: Missing field owner_id
+
+### Example of use 
+
+```
+GET http://localhost:8000/property/owner/100 
+```
+### Example of response
+```
+[
+    {
+        "id": 7,
+        "address": "Calle test",
+        "owner_fk": 100,
+        "ciudad": "Madrid",
+        "pais": "España",
+        "alquiler": 666
+    },
+    {
+        "id": 8,
+        "address": "calle alcala de chivert",
+        "owner_fk": 100,
+        "ciudad": "benicassim",
+        "pais": "andorra",
+        "alquiler": 1500
+    }
+]
+```
+
 ## Create a Property
 
 Create a property with all the information.
@@ -432,6 +478,93 @@ All fields are required.
 # Services
 
 ## Get services by property
+
+Devuelve los servicios incluidos y excluidos asociados a una propiedad.
+
+### Route
+`GET /property/services/{property_id}`
+
+### Params
+
+| Name        | Type | Description        |
+| ----------- | ---- | ------------------ |
+| property_id | int  | ID de la propiedad |
+
+### Error Codes
+
+- 400: Missing field (id property)
+
+### Example Request
+
+```
+curl -X GET "http://localhost:8000/property/services/1"
+```
+
+### Example of Response
+(si tiene servicios)
+```
+{
+    "included": "agua luz",
+    "excluded": "ascensor"
+}
+```
+(si no llegase a tener sercvicios)
+```
+{
+    "included": null,
+    "excluded": null
+}
+```
+
+
+### Notes
+
+- El endpoint devuelve un único objeto con los servicios asociados a la propiedad.
+- Los campos `included` y `excluded` indican los servicios incluidos y no incluidos en el alquiler.
+
+
+## Create services
+
+Devuelve los servicios incluidos y excluidos asociados a una propiedad.
+
+### Route
+`GET /property/services/{property_id}`
+
+### Params
+
+| Name        | Type | Description        |
+| ----------- | ---- | ------------------ |
+| property_id | int  | ID de la propiedad |
+
+### Error Codes
+
+- 400: Missing field (id property)
+
+### Example Request
+
+```
+curl -X GET "http://localhost:8000/property/services/1"
+```
+
+### Example of Response
+(si tiene servicios)
+```
+{
+    "included": "agua luz",
+    "excluded": "ascensor"
+}
+```
+(si no llegase a tener sercvicios)
+```
+{
+    "included": null,
+    "excluded": null
+}
+```
+
+
+
+## Update services
 
 Devuelve los servicios incluidos y excluidos asociados a una propiedad.
 
