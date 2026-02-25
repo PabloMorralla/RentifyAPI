@@ -28,7 +28,7 @@ def get_services_by_property(property_id: int):
             "excluded": None
         }
 
-    service = rows[0]
+    service = rows[-1]
 
     return {
         "included": service[0],
