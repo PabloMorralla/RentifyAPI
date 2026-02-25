@@ -66,12 +66,15 @@ def create_property(newProperty: Property):
     if not newProperty.owner_fk:
         raise HTTPException(status_code=400, detail="Owner obligatorio")
 
-    query = """
-        INSERT INTO Properties (address, owner_fk, ciudad, pais, alquiler)
-        VALUES (?, ?, ?, ?, ?)
-    """
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    execute_query(query, [
+        cursor.execute("""
+                    INSERT INTO Properties (address, owner_fk, ciudad, pais, alquiler)
+                    VALUES (?, ?, ?, ?, ?)
+                """, [
         newProperty.address,
         newProperty.owner_fk,
         newProperty.ciudad,
@@ -79,7 +82,32 @@ def create_property(newProperty: Property):
         newProperty.alquiler
     ])
 
-    return {"message": "Propiedad creada correctamente"}
+        conn.commit()
+        property_id = cursor.lastrowid
+
+        return {
+            "message": "Property created successfully",
+            "id": property_id
+        }
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
 
 @router.put("/property/update")
 def update_property(
