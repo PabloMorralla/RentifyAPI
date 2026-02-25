@@ -184,6 +184,11 @@ def delete_property(id: int):
         (id,)
     )
 
+    cursor.execute(
+        "DELETE FROM Tenants WHERE property_fk = ?",
+        (id,)
+    )
+
     conn.commit()
 
     if cursor.rowcount == 0:
