@@ -204,26 +204,59 @@ def update_property(
 
 @router.delete("/property/{id}")
 def delete_property(id: int):
-    conn = get_connection()
-    cursor = conn.cursor()
 
-    cursor.execute(
-        "DELETE FROM Properties WHERE id = ?",
-        (id,)
-    )
+    conn = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
 
-    cursor.execute(
-        "DELETE FROM Tenants WHERE property_fk = ?",
-        (id,)
-    )
-
-    conn.commit()
-
-    if cursor.rowcount == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="Propiedad no encontrada"
+        cursor.execute(
+            "DELETE FROM Properties WHERE id = ?",
+            (id,)
         )
+
+        if cursor.rowcount == 0:
+            raise HTTPException(
+                status_code=404,
+                detail="Propiedad no encontrada"
+            )
+
+        cursor.execute(
+            "SELECT COUNT(*) FROM Tenants WHERE property_fk = ?",
+            (id,)
+        )
+
+        tenant_count = cursor.fetchone()[0]
+        print(tenant_count)
+        if tenant_count > 0:
+            cursor.execute(
+                "DELETE FROM Tenants WHERE property_fk = ?",
+                (id,)
+            )
+
+        conn.commit()
+
+
+    except sqlite3.IntegrityError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=409, detail=f"Violación de integridad: {str(e)}")
+
+    except sqlite3.OperationalError as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Error SQL: {str(e)}")
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {str(e)}")
+
+    finally:
+        if conn:
+            conn.close()
+
+
     return {
         "message": "Propiedad eliminada correctamente",
         "user_id": id
