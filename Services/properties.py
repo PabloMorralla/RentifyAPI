@@ -18,6 +18,41 @@ class Property(BaseModel):
 
 
 
+
+
+@router.get("/property/owner/{owner_id}")
+def get_properties_by_owner(owner_id: int):
+
+    if not owner_id:
+        raise HTTPException(status_code=400, detail="Owner obligatorio")
+
+    query = """
+        SELECT *
+        FROM Properties
+        WHERE owner_fk = ?
+    """
+
+    rows = execute_query(query, [owner_id])
+
+    properties = []
+
+    if not rows:
+        return properties
+
+    for row in rows:
+
+        properties.append({
+            "id": row[0],
+            "address": row[1],
+            "owner_fk": row[2],
+            "ciudad": row[3],
+            "pais": row[4],
+            "alquiler": row[5]
+        })
+
+    return properties
+
+
 # -----------------------
 # POST /property/register
 # -----------------------

@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 
-@router.get("/incidents/create")
+@router.post("/incidents/create")
 def create_incident(
         body: dict = Body(...)
 ):

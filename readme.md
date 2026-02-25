@@ -7,6 +7,7 @@
   - [Login](#login)
 
 - [Property](#property)
+  - [Get Properties](#get-properties)
   - [Create a Property](#create-a-property)
   - [Update a Property](#update-a-property)
   - [Delete a Property](#delete-a-property)
@@ -17,6 +18,9 @@
 
 - [Services](#services)
   - [Get services by property](#get-services-by-property)
+  - [Create service](#create-services)
+  - [Update service](#update-services)
+
 
 - [Incidents](#incidents)
   - [Create an Incident](#create-an-incident)
@@ -243,6 +247,48 @@ Si el usuario no es inquilino o no tiene propiedades se devuelve el usuario con 
 ```
 
 # Property
+
+## Get Properties
+
+Get properties with all the information.
+
+### Route
+`GET /property/owner/{owner_id}`
+
+### Param:
+
+Only required owner id to return their properties.
+
+### Error Codes
+
+- 400: Missing field owner_id
+
+### Example of use 
+
+```
+GET http://localhost:8000/property/owner/100 
+```
+### Example of response
+```
+[
+    {
+        "id": 7,
+        "address": "Calle test",
+        "owner_fk": 100,
+        "ciudad": "Madrid",
+        "pais": "España",
+        "alquiler": 666
+    },
+    {
+        "id": 8,
+        "address": "calle alcala de chivert",
+        "owner_fk": 100,
+        "ciudad": "benicassim",
+        "pais": "andorra",
+        "alquiler": 1500
+    }
+]
+```
 
 ## Create a Property
 
@@ -477,6 +523,65 @@ curl -X GET "http://localhost:8000/property/services/1"
 - Los campos `included` y `excluded` indican los servicios incluidos y no incluidos en el alquiler.
 
 
+## Create services
+
+Crea los servicios de una propiedad los campos son `property_fk`, `included` y `excluded`.
+
+### Route
+`POST /services/create`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "property_fk": 7,
+    "included": "agua, luz",
+    "excluded": "internete"
+}
+```
+
+### Error Codes
+
+- 400: Missing field (field)
+
+### Example Request
+
+```
+curl -X POST http://localhost:8000/services/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "property_fk": 7,
+    "included": "agua, luz",
+    "excluded": "internete"
+  }' -v
+```
+
+
+
+## Update services
+
+Modifica los campos `included` y `excluded` de los servicios de una propiedad.
+### Route
+`PUT /services/update`
+
+### Body:
+
+All fields are required.
+
+```
+{
+    "property_fk": 7,
+    "included": "agua, luz",
+    "excluded": "internet"
+}
+```
+
+### Error Codes
+
+- 400: Missing field (field)
+
 
 # Incidents
 
@@ -636,11 +741,10 @@ The response is an array of strings.
     "https://gcronax.github.io/RentifyImages/pasillos.jpg",
     "https://gcronax.github.io/RentifyImages/room.jpg",
     "https://gcronax.github.io/RentifyImages/room2.jpg",
-    "https://gcronax.github.io/RentifyImages/sexroom.jpg",
+    "https://gcronax.github.io/RentifyImages/voidroom.jpg",
     "https://gcronax.github.io/RentifyImages/cocina.jpg",
     "https://gcronax.github.io/RentifyImages/bano.jpg",
-    "https://gcronax.github.io/RentifyImages/bano2.jpg",
-    "https://gcronax.github.io/RentifyImages/IMG-20260221-WA0001.jpg"
+    "https://gcronax.github.io/RentifyImages/bano2.jpg"
 ]
 ```
 
