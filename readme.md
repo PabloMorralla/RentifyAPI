@@ -525,90 +525,62 @@ curl -X GET "http://localhost:8000/property/services/1"
 
 ## Create services
 
-Devuelve los servicios incluidos y excluidos asociados a una propiedad.
+Crea los servicios de una propiedad los campos son `property_fk`, `included` y `excluded`.
 
 ### Route
-`GET /property/services/{property_id}`
+`POST /services/create`
 
-### Params
+### Body:
 
-| Name        | Type | Description        |
-| ----------- | ---- | ------------------ |
-| property_id | int  | ID de la propiedad |
+All fields are required.
+
+```
+{
+    "property_fk": 7,
+    "included": "agua, luz",
+    "excluded": "internete"
+}
+```
 
 ### Error Codes
 
-- 400: Missing field (id property)
+- 400: Missing field (field)
 
 ### Example Request
 
 ```
-curl -X GET "http://localhost:8000/property/services/1"
-```
-
-### Example of Response
-(si tiene servicios)
-```
-{
-    "included": "agua luz",
-    "excluded": "ascensor"
-}
-```
-(si no llegase a tener sercvicios)
-```
-{
-    "included": null,
-    "excluded": null
-}
+curl -X POST http://localhost:8000/services/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "property_fk": 7,
+    "included": "agua, luz",
+    "excluded": "internete"
+  }' -v
 ```
 
 
 
 ## Update services
 
-Devuelve los servicios incluidos y excluidos asociados a una propiedad.
-
+Modifica los campos `included` y `excluded` de los servicios de una propiedad.
 ### Route
-`GET /property/services/{property_id}`
+`PUT /services/update`
 
-### Params
+### Body:
 
-| Name        | Type | Description        |
-| ----------- | ---- | ------------------ |
-| property_id | int  | ID de la propiedad |
+All fields are required.
+
+```
+{
+    "property_fk": 7,
+    "included": "agua, luz",
+    "excluded": "internet"
+}
+```
 
 ### Error Codes
 
-- 400: Missing field (id property)
-
-### Example Request
-
-```
-curl -X GET "http://localhost:8000/property/services/1"
-```
-
-### Example of Response
-(si tiene servicios)
-```
-{
-    "included": "agua luz",
-    "excluded": "ascensor"
-}
-```
-(si no llegase a tener sercvicios)
-```
-{
-    "included": null,
-    "excluded": null
-}
-```
-
-
-### Notes
-
-- El endpoint devuelve un único objeto con los servicios asociados a la propiedad.
-- Los campos `included` y `excluded` indican los servicios incluidos y no incluidos en el alquiler.
-
+- 400: Missing field (field)
 
 
 # Incidents
